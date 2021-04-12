@@ -51,21 +51,21 @@ func GetName(l *log.Logger) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		name := mux.Vars(r)["name"]
 
+		var result responseList
 		if val, ok := GetCache().GetName(name); ok {
-			var result response
 			vr := responseData{
 				ID:         val,
 				Type:       "com.atlas.cos.rest.attribute.BlockedNameAttributes",
 				Attributes: responseAttributes{Name: val},
 			}
-			result.Data = vr
-			rw.WriteHeader(http.StatusOK)
-			err := toJSON(result, rw)
-			if err != nil {
-				l.Print(err.Error())
-			}
+			result.Data = append(result.Data, vr)
 		} else {
-			rw.WriteHeader(http.StatusNotFound)
+			result.Data = make([]responseData, 0)
+		}
+		rw.WriteHeader(http.StatusOK)
+		err := toJSON(result, rw)
+		if err != nil {
+			l.Print(err.Error())
 		}
 	}
 }
