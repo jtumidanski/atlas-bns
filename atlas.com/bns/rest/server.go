@@ -2,6 +2,7 @@ package rest
 
 import (
 	"atlas-bns/name"
+	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
 	"os"
@@ -10,11 +11,11 @@ import (
 import "github.com/gorilla/mux"
 
 type server struct {
-	l  *log.Logger
+	l  *logrus.Logger
 	hs *http.Server
 }
 
-func GetServer(l *log.Logger) *server {
+func GetServer(l *logrus.Logger) *server {
 	r := mux.NewRouter().PathPrefix("/ms/bns").Subrouter()
 	r.Use(commonHeader)
 
@@ -22,10 +23,13 @@ func GetServer(l *log.Logger) *server {
 	cr.HandleFunc("", name.GetName(l)).Methods(http.MethodGet).Queries("name", "{name}")
 	cr.HandleFunc("", name.GetNames(l)).Methods(http.MethodGet)
 
+	w := l.Writer()
+	defer w.Close()
+
 	hs := http.Server{
 		Addr:         ":8080",
 		Handler:      r,
-		ErrorLog:     l,                 // set the logger for the server
+		ErrorLog:     log.New(w, "", 0), // set the logger for the server
 		ReadTimeout:  5 * time.Second,   // max time to read request from the client
 		WriteTimeout: 10 * time.Second,  // max time to write response to the client
 		IdleTimeout:  120 * time.Second, // max time for connections using TCP Keep-Alive
@@ -34,10 +38,10 @@ func GetServer(l *log.Logger) *server {
 }
 
 func (s *server) Run() {
-	s.l.Println("[INFO] Starting server on port 8080")
+	s.l.Infof("Starting server on port 8080")
 	err := s.hs.ListenAndServe()
 	if err != nil {
-		s.l.Printf("Error starting server: %s\n", err)
+		s.l.WithError(err).Errorf("Error starting server.")
 		os.Exit(1)
 	}
 }

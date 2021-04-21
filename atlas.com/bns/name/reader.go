@@ -3,13 +3,13 @@ package name
 import (
 	"encoding/json"
 	"errors"
+	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
-func readDataDirectory(l *log.Logger, d string) ([]string, error) {
+func readDataDirectory(l *logrus.Logger, d string) ([]string, error) {
 	f, err := os.Open(d)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func readDataDirectory(l *log.Logger, d string) ([]string, error) {
 
 	var companions []string
 	for _, cf := range fs {
-		l.Printf("[INFO] found %s for parsing.", cf.Name())
+		l.Infof("Found %s for parsing.", cf.Name())
 		v, err := readDataFile(l, d+"/"+cf.Name())
 		if err != nil {
 			return nil, err
@@ -42,8 +42,8 @@ func readDataDirectory(l *log.Logger, d string) ([]string, error) {
 	return companions, nil
 }
 
-func readDataFile(l *log.Logger, p string) ([]string, error) {
-	l.Printf("[INFO] reading %s.", p)
+func readDataFile(l *logrus.Logger, p string) ([]string, error) {
+	l.Debugf("Reading %s.", p)
 	f, err := os.Open(p)
 	if err != nil {
 		return nil, err

@@ -28,5 +28,6 @@ WORKDIR /
 
 COPY --from=build-env /server /
 COPY --from=build-env /atlas.com/bns/swagger.yaml /
+COPY data /data
 
 CMD ["/server"]

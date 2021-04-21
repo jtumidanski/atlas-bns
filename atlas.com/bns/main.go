@@ -1,16 +1,16 @@
 package main
 
 import (
+	"atlas-bns/logger"
 	"atlas-bns/name"
 	"atlas-bns/rest"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
 func main() {
-	l := log.New(os.Stdout, "bns ", log.LstdFlags|log.Lmicroseconds)
+	l := logger.CreateLogger()
 
 	name.InitCache(l)
 
@@ -22,5 +22,5 @@ func main() {
 
 	// Block until a signal is received.
 	sig := <-c
-	l.Println("[INFO] Shutting down via signal:", sig)
+	l.Infoln("Shutting down via signal:", sig)
 }

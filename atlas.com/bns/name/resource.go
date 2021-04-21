@@ -3,17 +3,13 @@ package name
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"net/http"
 )
 
 type responseList struct {
 	Data []responseData `json:"data"`
-}
-
-type response struct {
-	Data responseData `json:"data"`
 }
 
 type responseData struct {
@@ -26,7 +22,7 @@ type responseAttributes struct {
 	Name string `json:"name"`
 }
 
-func GetNames(l *log.Logger) http.HandlerFunc {
+func GetNames(l *logrus.Logger) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		vs := GetCache().GetNames()
 
@@ -42,12 +38,12 @@ func GetNames(l *log.Logger) http.HandlerFunc {
 		rw.WriteHeader(http.StatusOK)
 		err := toJSON(result, rw)
 		if err != nil {
-			l.Print(err.Error())
+			l.WithError(err).Errorf("Error writing response")
 		}
 	}
 }
 
-func GetName(l *log.Logger) http.HandlerFunc {
+func GetName(l *logrus.Logger) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		name := mux.Vars(r)["name"]
 
@@ -65,7 +61,7 @@ func GetName(l *log.Logger) http.HandlerFunc {
 		rw.WriteHeader(http.StatusOK)
 		err := toJSON(result, rw)
 		if err != nil {
-			l.Print(err.Error())
+			l.WithError(err).Errorf("Error writing response")
 		}
 	}
 }
