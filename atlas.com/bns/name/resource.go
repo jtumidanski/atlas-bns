@@ -22,7 +22,7 @@ type responseAttributes struct {
 	Name string `json:"name"`
 }
 
-func GetNames(l *logrus.Logger) http.HandlerFunc {
+func GetNames(l logrus.FieldLogger) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		vs := GetCache().GetNames()
 
@@ -43,7 +43,7 @@ func GetNames(l *logrus.Logger) http.HandlerFunc {
 	}
 }
 
-func GetName(l *logrus.Logger) http.HandlerFunc {
+func GetName(l logrus.FieldLogger) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		name := mux.Vars(r)["name"]
 
