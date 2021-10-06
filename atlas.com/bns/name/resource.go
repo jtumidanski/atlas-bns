@@ -22,6 +22,13 @@ type responseAttributes struct {
 	Name string `json:"name"`
 }
 
+func InitResource(router *mux.Router, l logrus.FieldLogger) {
+
+	r := router.PathPrefix("/names").Subrouter()
+	r.HandleFunc("", GetName(l)).Methods(http.MethodGet).Queries("name", "{name}")
+	r.HandleFunc("", GetNames(l)).Methods(http.MethodGet)
+}
+
 func GetNames(l logrus.FieldLogger) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		vs := GetCache().GetNames()

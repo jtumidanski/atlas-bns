@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"atlas-bns/name"
 	"context"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -9,17 +8,21 @@ import (
 	"sync"
 )
 
-func CreateRestService(l *logrus.Logger, ctx context.Context, wg *sync.WaitGroup) {
-	go NewServer(l, ctx, wg, ProduceRoutes)
+type RouteInitializer func(*mux.Router, logrus.FieldLogger)
+
+func CreateService(l *logrus.Logger, ctx context.Context, wg *sync.WaitGroup, basePath string, initializers ...RouteInitializer) {
+	go NewServer(l, ctx, wg, ProduceRoutes(basePath, initializers...))
 }
 
-func ProduceRoutes(l logrus.FieldLogger) http.Handler {
-	r := mux.NewRouter().PathPrefix("/ms/bns").Subrouter()
-	r.Use(CommonHeader)
+func ProduceRoutes(basePath string, initializers ...RouteInitializer) func(l logrus.FieldLogger) http.Handler {
+	return func(l logrus.FieldLogger) http.Handler {
+		router := mux.NewRouter().PathPrefix(basePath).Subrouter().StrictSlash(true)
+		router.Use(CommonHeader)
 
-	cr := r.PathPrefix("/names").Subrouter()
-	cr.HandleFunc("", name.GetName(l)).Methods(http.MethodGet).Queries("name", "{name}")
-	cr.HandleFunc("", name.GetNames(l)).Methods(http.MethodGet)
+		for _, initializer := range initializers {
+			initializer(router, l)
+		}
 
-	return r
+		return router
+	}
 }
