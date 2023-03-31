@@ -1,6 +1,6 @@
 # Start from a Debian image with the latest version of Go installed
 # and a workspace (GOPATH) configured at /go.
-FROM golang:alpine3.12 AS build-env
+FROM golang:1.20-alpine3.17 AS build-env
 
 # Copy the local package files to the container's workspace.
 
@@ -14,7 +14,7 @@ WORKDIR /atlas.com/bns
 
 RUN go build -o /server
 
-FROM alpine:3.12
+FROM alpine:3.17
 
 # Port 8080 belongs to our application
 EXPOSE 8080
